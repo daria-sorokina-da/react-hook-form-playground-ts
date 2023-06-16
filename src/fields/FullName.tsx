@@ -45,7 +45,7 @@ const FullNameFields = <
 
   return (
     <div>
-      <label htmlFor={`${name}.first`}>First Name</label>
+      <label htmlFor={`${name}.first`}>First Name (required if email is req@email.com)</label>
       <input
         id={`${name}.first`}
         value={value.first}
@@ -61,7 +61,7 @@ const FullNameFields = <
         }
         render={({ message }) => <p>{message}</p>}
       />
-      <label htmlFor={`${name}.last`}>Last Name</label>
+      <label htmlFor={`${name}.last`}>Last Name (required if first name is req)</label>
       <input
         id={`${name}.last`}
         value={value.last}

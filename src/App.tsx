@@ -32,7 +32,10 @@ const schema: MappedLike<FormFields, Joi.SchemaLike> = {
       .empty("")
       .max(10)
       .message("Max length is 10")
-      .required(),
+      .when("...email", {
+        is: "req@email.com",
+        then: Joi.required(),
+      }),
     last: Joi.string()
       .empty("")
       .max(10)
@@ -42,27 +45,35 @@ const schema: MappedLike<FormFields, Joi.SchemaLike> = {
         then: Joi.required(),
       }),
   }),
-  petInfos: Joi.array().items(
-    Joi.object({
-      name: Joi.string()
-        .empty("")
-        .max(10)
-        .message("Max length is 10")
-        .required(),
-      isFat: Joi.boolean(),
-      favouriteFood: Joi.string().empty("").max(10).when("isFat", {
-        is: true,
-        then: Joi.required(),
-      }),
-    })
-  ),
-  email: Joi.string()
-    .email({ tlds: { allow: false } })
-    .required(),
   hasPets: Joi.boolean().when("personName.first", {
     is: "req",
     then: Joi.required(),
   }),
+  petInfos: Joi.array()
+    .items(
+      Joi.object({
+        name: Joi.string()
+          .empty("")
+          .max(10)
+          .message("Max length is 10")
+          .when("....personName.first", {
+            is: "req",
+            then: Joi.required(),
+          }),
+        isFat: Joi.boolean(),
+        favouriteFood: Joi.string().empty("").max(10).when("isFat", {
+          is: true,
+          then: Joi.required(),
+        }),
+      })
+    )
+    .when("hasPets", {
+      is: true,
+      then: Joi.array().min(1),
+    }),
+  email: Joi.string()
+    .email({ tlds: { allow: false } })
+    .required(),
 };
 
 export const formResolver = joiResolver(Joi.object(schema), {
@@ -149,12 +160,19 @@ export default function App() {
             control={control}
           />
         ))}
-        <button type="button" onClick={() => addPet()}>
-          Add Pet
-        </button>
-        <button type="submit" onClick={() => log()}>
-          Submit
-        </button>
+        <ErrorMessage
+          errors={formState.errors}
+          name="petInfos"
+          render={({ message }) => <p>{message}</p>}
+        />
+        <div>
+          <button type="button" onClick={() => addPet()}>
+            Add Pet
+          </button>
+          <button type="submit" onClick={() => log()}>
+            Submit
+          </button>
+        </div>
       </form>
     </div>
   );

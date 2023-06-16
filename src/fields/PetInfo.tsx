@@ -54,7 +54,7 @@ const PetInfoFields = <
 
   return (
     <div>
-      <label htmlFor={`${name}.name`}>Pet Name</label>
+      <label htmlFor={`${name}.name`}>Pet Name (required when first name is req)</label>
       <input
         id={`${name}.name`}
         value={value.name}
@@ -80,7 +80,7 @@ const PetInfoFields = <
       />
       {petInfo.isFat && (
         <>
-          <label htmlFor={`${name}.favouriteFood`}>Pet's favourite food</label>
+          <label htmlFor={`${name}.favouriteFood`}>Pet's favourite food (required when pet is fat)</label>
           <input
             id={`${name}.favouriteFood`}
             value={value.favouriteFood}
