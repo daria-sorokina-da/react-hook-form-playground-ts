@@ -2,6 +2,17 @@
   text-align: center;
 }
 
+p {
+  color:red;
+  display: inline;
+  margin-left: 5px;
+}
+
+label{
+  margin-left: 20px;
+  margin-right: 5px;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

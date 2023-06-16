@@ -1,10 +1,11 @@
 import "./App.css";
 import Joi from "joi";
 import { joiResolver } from "@hookform/resolvers/joi";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import { useEffect } from "react";
-import FullName from "./FullName";
+import FullName from "./fields/FullName";
+import PetInfo from "./fields/PetInfo";
 
 export type MappedLike<Type, PropertyType> = {
   [Property in keyof Type]: PropertyType;
@@ -16,13 +17,43 @@ export type FormFields = {
     last: string | undefined;
   };
   email: string | undefined;
+  petInfos: {
+    name: string | undefined;
+    isFat: boolean;
+    favouriteFood: string | undefined;
+  }[];
 };
 
 const schema: MappedLike<FormFields, Joi.SchemaLike> = {
   name: Joi.object({
-    first: Joi.string().max(10).message("Max length is 10").required(),
-    last: Joi.string().max(10).message("Max length is 10").required(),
+    first: Joi.string()
+      .empty("")
+      .max(10)
+      .message("Max length is 10")
+      .required(),
+    last: Joi.string()
+      .empty("")
+      .max(10)
+      .message("Max length is 10")
+      .when("first", {
+        is: "req",
+        then: Joi.required(),
+      }),
   }),
+  petInfos: Joi.array().items(
+    Joi.object({
+      name: Joi.string()
+        .empty("")
+        .max(10)
+        .message("Max length is 10")
+        .required(),
+      isFat: Joi.boolean(),
+      favouriteFood: Joi.string().empty("").max(10).when("isFat", {
+        is: true,
+        then: Joi.required(),
+      }),
+    })
+  ),
   email: Joi.string()
     .email({ tlds: { allow: false } })
     .required(),
@@ -46,8 +77,13 @@ export default function App() {
         last: "last",
       },
       email: "t@e.c",
+      petInfos: [],
     },
     resolver: formResolver,
+  });
+  const petInfosFields = useFieldArray({
+    control,
+    name: "petInfos",
   });
 
   useEffect(() => {});
@@ -64,6 +100,14 @@ export default function App() {
     console.log(formState.errors);
   };
 
+  const addPet = () => {
+    petInfosFields.append({
+      name: undefined,
+      isFat: false,
+      favouriteFood: undefined,
+    });
+  };
+
   return (
     <div className="App">
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -75,7 +119,13 @@ export default function App() {
             formState: { errors },
           }) => (
             <div>
-              <input value={value} onChange={onChange} onBlur={onBlur} />
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                value={value}
+                onChange={onChange}
+                onBlur={onBlur}
+              />
               <ErrorMessage
                 errors={errors}
                 name={name}
@@ -85,6 +135,16 @@ export default function App() {
           )}
         />
         <FullName name="name" control={control} />
+        {petInfosFields.fields.map((petInfo, index) => (
+          <PetInfo
+            key={petInfo.id}
+            name={`petInfos.${index}`}
+            control={control}
+          />
+        ))}
+        <button type="button" onClick={() => addPet()}>
+          Add Pet
+        </button>
         <button type="submit" onClick={() => log()}>
           Submit
         </button>

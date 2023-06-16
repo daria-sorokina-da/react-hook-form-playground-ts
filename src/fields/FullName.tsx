@@ -1,32 +1,16 @@
-import { ErrorMessage } from "@hookform/error-message";
+import {
+  ErrorMessage,
+  FieldValuesFromFieldErrors,
+} from "@hookform/error-message";
 import { useEffect, useState } from "react";
 import {
-  Control,
   Controller,
-  ControllerFieldState,
-  ControllerRenderProps,
   FieldErrors,
   FieldName,
   FieldPath,
   FieldValues,
-  UseFormStateReturn,
 } from "react-hook-form";
-
-type Props<TFieldValues extends FieldValues> = {
-  name: FieldPath<TFieldValues>;
-  control: Control<TFieldValues, any>;
-};
-export declare type FieldValuesFromFieldErrors<TFieldErrors> =
-  TFieldErrors extends FieldErrors<infer TFieldValues> ? TFieldValues : never;
-
-type FullNameFieldsProps<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
-> = {
-  field: ControllerRenderProps<TFieldValues, TName>;
-  fieldState: ControllerFieldState;
-  formState: UseFormStateReturn<TFieldValues>;
-};
+import { CustomFormFieldInternalProps, CustomFormFieldProps } from "./types";
 
 const FullNameFields = <
   TFieldValues extends FieldValues,
@@ -34,7 +18,7 @@ const FullNameFields = <
 >({
   field: { onChange, onBlur, value, name, ref },
   formState: { errors },
-}: FullNameFieldsProps<TFieldValues, TName>) => {
+}: CustomFormFieldInternalProps<TFieldValues, TName>) => {
   type FullName = {
     first: string | undefined;
     last: string | undefined;
@@ -61,7 +45,9 @@ const FullNameFields = <
 
   return (
     <div>
+      <label htmlFor={`${name}.first`}>First Name</label>
       <input
+        id={`${name}.first`}
         value={value.first}
         onChange={(e) => updateFirst(e.target.value)}
         onBlur={onBlur}
@@ -75,7 +61,9 @@ const FullNameFields = <
         }
         render={({ message }) => <p>{message}</p>}
       />
+      <label htmlFor={`${name}.last`}>Last Name</label>
       <input
+        id={`${name}.last`}
         value={value.last}
         onChange={(e) => updateLast(e.target.value)}
         onBlur={onBlur}
@@ -96,7 +84,7 @@ const FullNameFields = <
 const FullName = <TFieldValues extends FieldValues>({
   name,
   control,
-}: Props<TFieldValues>) => (
+}: CustomFormFieldProps<TFieldValues>) => (
   <Controller
     name={name}
     control={control}
