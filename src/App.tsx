@@ -6,17 +6,19 @@ import { ErrorMessage } from "@hookform/error-message";
 import { useEffect } from "react";
 import FullName from "./fields/FullName";
 import PetInfo from "./fields/PetInfo";
+import YesNoCheckboxes from "./fields/YesNoCheckboxes";
 
 export type MappedLike<Type, PropertyType> = {
   [Property in keyof Type]: PropertyType;
 };
 
 export type FormFields = {
-  name: {
+  personName: {
     first: string | undefined;
     last: string | undefined;
   };
   email: string | undefined;
+  hasPets: boolean | undefined;
   petInfos: {
     name: string | undefined;
     isFat: boolean;
@@ -25,7 +27,7 @@ export type FormFields = {
 };
 
 const schema: MappedLike<FormFields, Joi.SchemaLike> = {
-  name: Joi.object({
+  personName: Joi.object({
     first: Joi.string()
       .empty("")
       .max(10)
@@ -57,6 +59,10 @@ const schema: MappedLike<FormFields, Joi.SchemaLike> = {
   email: Joi.string()
     .email({ tlds: { allow: false } })
     .required(),
+  hasPets: Joi.boolean().when("personName.first", {
+    is: "req",
+    then: Joi.required(),
+  }),
 };
 
 export const formResolver = joiResolver(Joi.object(schema), {
@@ -72,7 +78,7 @@ export default function App() {
   const { handleSubmit, control, formState, getValues } = useForm<FormFields>({
     mode: "onTouched",
     defaultValues: {
-      name: {
+      personName: {
         first: "first",
         last: "last",
       },
@@ -134,7 +140,8 @@ export default function App() {
             </div>
           )}
         />
-        <FullName name="name" control={control} />
+        <FullName name="personName" control={control} />
+        <YesNoCheckboxes name="hasPets" control={control} />
         {petInfosFields.fields.map((petInfo, index) => (
           <PetInfo
             key={petInfo.id}
