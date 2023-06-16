@@ -32,7 +32,7 @@ const schema: MappedLike<FormFields, Joi.SchemaLike> = {
       .empty("")
       .max(10)
       .message("Max length is 10")
-      .when("...email", {
+      .when("...email", { // https://joi.dev/api/?v=17.9.1#relative-references
         is: "req@email.com",
         then: Joi.required(),
       }),
@@ -56,7 +56,7 @@ const schema: MappedLike<FormFields, Joi.SchemaLike> = {
           .empty("")
           .max(10)
           .message("Max length is 10")
-          .when("....personName.first", {
+          .when("/personName.first", { // https://joi.dev/api/?v=17.9.1#relative-references
             is: "req",
             then: Joi.required(),
           }),

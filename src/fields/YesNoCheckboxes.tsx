@@ -35,6 +35,7 @@ const YesNoCheckboxesFields = <
 
   return (
     <div>
+      <span>Do you have pets? (required when first name is req)</span>
       <label htmlFor={`${name}.yes`}>Yes</label>
       <input
         type="checkbox"
