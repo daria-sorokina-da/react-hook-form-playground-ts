@@ -32,18 +32,20 @@ const schema: MappedLike<FormFields, Joi.SchemaLike> = {
       .empty("")
       .max(10)
       .message("Max length is 10")
-      .when("...email", { // https://joi.dev/api/?v=17.9.1#relative-references
+      .required(),
+      /*.when("...email", { // https://joi.dev/api/?v=17.9.1#relative-references
         is: "req@email.com",
         then: Joi.required(),
-      }),
+      }),*/
     last: Joi.string()
       .empty("")
       .max(10)
       .message("Max length is 10")
-      .when("first", {
+      .required()
+      /*.when("first", {
         is: "req",
         then: Joi.required(),
-      }),
+      }),*/
   }),
   hasPets: Joi.boolean().when("personName.first", {
     is: "req",
@@ -90,8 +92,8 @@ export default function App() {
     mode: "onTouched",
     defaultValues: {
       personName: {
-        first: "first",
-        last: "last",
+        first: undefined,
+        last: undefined,
       },
       email: "t@e.c",
       petInfos: [],
@@ -124,6 +126,10 @@ export default function App() {
       favouriteFood: undefined,
     });
   };
+
+  console.log('dirty', formState.dirtyFields);
+  console.log('touched', formState.touchedFields);
+  console.log('errors', formState.errors);
 
   return (
     <div className="App">

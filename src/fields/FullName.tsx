@@ -17,15 +17,24 @@ const FullNameFields = <
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >({
   field: { onChange, onBlur, value, name, ref },
-  formState: { errors },
+  formState,
+  fieldState,
 }: CustomFormFieldInternalProps<TFieldValues, TName>) => {
   type FullName = {
     first: string | undefined;
     last: string | undefined;
   };
+  type FullNameTouched = {
+    [field in keyof FullName]: boolean;
+  };
   const [fullName, setFullName] = useState<FullName>(value);
+  const [touched, setTouched] = useState<FullNameTouched>({
+    first: false,
+    last: false,
+  });
 
   const updateFirst = (newFirst: string | undefined) => {
+    setTouched((prevState) => ({ ...prevState, first: true }));
     setFullName((prevState) => ({
       ...prevState,
       first: newFirst,
@@ -33,50 +42,67 @@ const FullNameFields = <
   };
 
   const updateLast = (newLast: string | undefined) => {
+    setTouched((prevState) => ({ ...prevState, last: true }));
     setFullName((prevState) => ({
       ...prevState,
       last: newLast,
     }));
   };
 
+  const onFieldBlur = (fieldName: keyof FullName) => {
+    setTouched((prevState) => ({ ...prevState, [fieldName]: true }));
+    onBlur();
+  };
+
   useEffect(() => {
     onChange(fullName);
   }, [fullName]);
 
+  console.log("FullName formState", formState);
+  console.log("FullName fieldState", fieldState);
+  console.log("FullName touched", touched);
+
+  const shouldShowError = (fieldName: keyof FullName) =>
+    formState.isSubmitted || touched[fieldName];
+
   return (
     <div>
-      <label htmlFor={`${name}.first`}>First Name (required if email is req@email.com)</label>
+      <label htmlFor={`${name}.first`}>First Name (required)</label>
       <input
         id={`${name}.first`}
         value={value.first}
         onChange={(e) => updateFirst(e.target.value)}
-        onBlur={onBlur}
+        onBlur={() => onFieldBlur('first')}
       />
-      <ErrorMessage
-        errors={errors}
-        name={
-          `${name}.first` as unknown as FieldName<
-            FieldValuesFromFieldErrors<FieldErrors<TFieldValues>>
-          >
-        }
-        render={({ message }) => <p>{message}</p>}
-      />
-      <label htmlFor={`${name}.last`}>Last Name (required if first name is req)</label>
+      {shouldShowError("first") && (
+        <ErrorMessage
+          errors={formState.errors}
+          name={
+            `${name}.first` as unknown as FieldName<
+              FieldValuesFromFieldErrors<FieldErrors<TFieldValues>>
+            >
+          }
+          render={({ message }) => <p>{message}</p>}
+        />
+      )}
+      <label htmlFor={`${name}.last`}>Last Name (required)</label>
       <input
         id={`${name}.last`}
         value={value.last}
         onChange={(e) => updateLast(e.target.value)}
-        onBlur={onBlur}
+        onBlur={() => onFieldBlur('last')}
       />
-      <ErrorMessage
-        errors={errors}
-        name={
-          `${name}.last` as unknown as FieldName<
-            FieldValuesFromFieldErrors<FieldErrors<TFieldValues>>
-          >
-        }
-        render={({ message }) => <p>{message}</p>}
-      />
+      {shouldShowError("last") && (
+        <ErrorMessage
+          errors={formState.errors}
+          name={
+            `${name}.last` as unknown as FieldName<
+              FieldValuesFromFieldErrors<FieldErrors<TFieldValues>>
+            >
+          }
+          render={({ message }) => <p>{message}</p>}
+        />
+      )}
     </div>
   );
 };
